@@ -34,15 +34,14 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest    
-    env:
-       PR_NUMBER: ${{ github.event.pull_request.number }}
+
  # Secrets to be created in repository  Secret & Hostname & Username      
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
 
       - name: Generate deployment package
-        run: zip -r ${{ PR_NUMBER }}.zip build/ 
+        run: zip -r build.zip build/ 
 
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
@@ -50,8 +49,8 @@ jobs:
           HOSTNAME: ${{ secrets.HOSTNAME }}
           USER_NAME: ${{ secrets.USERNAME }}
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-          source: "${{ PR_NUMBER }}.zip"
-          target: "/home/ubuntu/rcx/"
+          source: "build.zip"
+          target: "/home/ec2-user/"
     
       - uses: actions/checkout@v2 
       - name: Deploy in EC2
@@ -59,14 +58,14 @@ jobs:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
             HOSTNAME : ${{ secrets.HOSTNAME  }}
             USER_NAME : ${{ secrets.USER_NAME  }}
-            PR_NUMBER: ${{ github.event.pull_request.number }}
+   
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
-            cd /home/ubuntu/rcx/ &&
-            unzip ${{ PR_NUMBER }}.zip &&
-            cd ${{ PR_NUMBER }} &&
+            cd /home/ec2-user/ &&
+            unzip build.zip &&
+            cd build &&
             ls -lrt
             
 

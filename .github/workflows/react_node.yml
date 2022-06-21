@@ -39,7 +39,7 @@ jobs:
       uses: appleboy/scp-action@master
       with:
           host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.HOSTNAME }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           source: "build.zip"
           target: "/home/ec2-user/"
@@ -61,7 +61,7 @@ jobs:
             unzip build.zip
             
           host: ${{ secrets.HOSTNAME }}}
-          user: ${{ secrets.HOSTNAME }}
+          user: ${{ secrets.USERNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           
 

@@ -17,17 +17,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       
-    - uses: jwalton/gh-find-current-pr@v1
-      id: findPr
-      with:
-      # Can be "open", "closed", or "all".  Defaults to "open".
-        state: closed
-      # This will echo "Your PR is 7", or be skipped if there is no current PR.
-    - run: echo "Your PR is ${PR}"
-      if: success() && steps.findPr.outputs.number
-      env:
-        PR_NUMBER: ${{ steps.findPr.outputs.pr }}
-
     - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -44,7 +33,7 @@ jobs:
       env:
           CI: ""
     - name: Generate deployment package
-      run: zip -r ${{ PR_NUMBER }}.zip ./build/*
+      run: zip -r build.zip ./build/*
 
     - name: copy file via ssh key
       uses: appleboy/scp-action@master
@@ -52,7 +41,7 @@ jobs:
           host: ${{ secrets.HOSTNAME }}
           username: ${{ secrets.HOSTNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
-          source: "${{ PR_NUMBER }}.zip"
+          source: "build.zip"
           target: "/home/ec2-user/"
 
   deploy:
@@ -66,10 +55,10 @@ jobs:
         with:
           command: |
             cd /home/ec2-user/
-            mkdir ${{ PR_NUMBER }}
-            mv ${{ PR_NUMBER }}.zip ${{ PR_NUMBER }}
-            cd ${{ PR_NUMBER }}
-            unzip ${{ PR_NUMBER }}.zip
+            mkdir PR
+            mv build.zip PR
+            cd PR
+            unzip build.zip
             
           host: ${{ secrets.HOSTNAME }}}
           user: ${{ secrets.HOSTNAME }}

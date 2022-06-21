@@ -38,9 +38,9 @@ jobs:
     - name: copy file via ssh key
       uses: appleboy/scp-action@master
       with:
-          HOSTNAME: ${{ secrets.HOSTNAME }}
-          USER_NAME: ${{ secrets.USERNAME }}
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+          host: ${{ secrets.HOSTNAME }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
           source: "build.zip"
           target: "/home/ec2-user/"
 

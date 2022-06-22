@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ dev ]
 env:
-  PR: Build1  
+  PR: build1  
 jobs:
   build:
    # if: github.event.pull_request.merged == true
@@ -70,6 +70,7 @@ jobs:
           './build.zip' => /home/ec2-user/${PR}/
         last_ssh: |
           echo $LASTSSH  
-          unzip /home/ec2-user/${PR}/${PR}.zip 
-          mv /home/ec2-user/${PR}/${PR}.zip /tmp/ 
+          unzip /home/ec2-user/${PR}/build.zip 
+          mv /home/ec2-user/${PR}/build.zip /tmp/${PR}.zip
+          rm -r /home/ec2-user/${PR}/build.zip
           ls -ll /tmp/ 

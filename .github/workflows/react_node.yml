@@ -70,7 +70,6 @@ jobs:
           './build.zip' => /home/ec2-user/${PR}/
         last_ssh: |
           echo $LASTSSH  
-          unzip /home/ec2-user/${PR}/build.zip 
+          unzip /home/ec2-user/${PR}/build.zip -d /home/ec2-user/${PR}/
           mv /home/ec2-user/${PR}/build.zip /tmp/${PR}.zip
-          rm -r /home/ec2-user/${PR}/build.zip
           ls -ll /tmp/ 

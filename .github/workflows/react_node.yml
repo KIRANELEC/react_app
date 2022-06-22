@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ dev ]
 env:
-  PR: build1  
+  PR: ${{ github.event.pull_request.title }}  
 jobs:
   build:
    # if: github.event.pull_request.merged == true

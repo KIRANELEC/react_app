@@ -64,12 +64,12 @@ jobs:
         first_ssh: |
           rm -rf /home/ec2-user/${PR} 
           mkdir -p /home/ec2-user/${PR}
+          mkdir -p /home/ec2-user/nginxconf/
         scp: |
-          './${PR}.conf' => /etc/nginx/sites-available/
+          './${PR}.conf' => /home/ec2-user/nginxconf/
           './build.zip' => /home/ec2-user/${PR}/
         last_ssh: |
           echo $LASTSSH  
           unzip /home/ec2-user/${PR}/${PR}.zip 
-          sudo ln -s /etc/nginx/sites-available/${PR}.conf /etc/nginx/sites-enabled/${PR}.conf 
           mv /home/ec2-user/${PR}/${PR}.zip /tmp/ 
           ls -ll /tmp/ 

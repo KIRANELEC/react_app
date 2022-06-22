@@ -3,7 +3,8 @@ name: React_node.yml
 on:
   pull_request:
     branches: [ dev ]
-  
+env:
+  PR: Build1  
 jobs:
   build:
    # if: github.event.pull_request.merged == true
@@ -35,37 +36,40 @@ jobs:
     - name: Generate deployment package
       run: zip -r build.zip ./build/*
 
-    - name: copy file via ssh key
-      uses: appleboy/scp-action@master
+    - name: Nginx Config File builder
+      run: |
+          echo "server {"  >> ${PR}.conf
+          echo "     listen 80;" >> ${PR}.conf
+          echo "     listen [::]:80;" >> ${PR}.conf
+          echo "     server_name ${PR}.com www.${PR}.com;" >> ${PR}.conf
+
+          echo "     root /home/ec2-user/${PR}/build;" >> ${PR}.conf
+
+          echo "     index index.html index.htm;" >> ${PR}.conf
+
+          echo "     location / {" >> ${PR}.conf
+          echo "         try_files $uri $uri/ =404;" >> ${PR}.conf
+          echo "     }" >> ${PR}.conf
+          echo "}" >> ${PR}.conf
+
+    - name: Copy Build Artifacts & Deploy
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      env:
+        LASTSSH: "Storing the Build Artifact in a separate location"
       with:
-          host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          source: "build.zip"
-          target: "/home/ec2-user/"
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest    
-
- # Secrets to be created in repository  Secret & Hostname & Username      
-    steps:
-      - name: ls -a via ssh
-        uses: nerd4ever/ssh-action@master
-        with:
-          command: |
-            cd /home/ec2-user/
-            mkdir PR
-            mv build.zip PR
-            cd PR
-            unzip build.zip
-            
-          host: ${{ secrets.HOSTNAME }}}
-          user: ${{ secrets.USERNAME }}
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          
-
-            
-
-
-
+        host: ${{ secrets.HOSTNAME }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.AWS_PRIVATE_KEY }}
+        connect_timeout: 10s
+        first_ssh: |
+          rm -rf /home/ec2-user/${PR} 
+          mkdir -p /home/ec2-user/${PR}
+        scp: |
+          './${PR}.conf' => /etc/nginx/sites-available/
+          './build.zip' => /home/ec2-user/${PR}/
+        last_ssh: |
+          echo $LASTSSH  
+          unzip /home/ec2-user/${PR}/${PR}.zip 
+          sudo ln -s /etc/nginx/sites-available/${PR}.conf /etc/nginx/sites-enabled/${PR}.conf 
+          mv /home/ec2-user/${PR}/${PR}.zip /tmp/ 
+          ls -ll /tmp/ 
